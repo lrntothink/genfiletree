@@ -36,12 +36,13 @@ for(int i=0;i<al.size();i++){
 	String parentId = tmpList.get(0)==null?"":tmpList.get(0).toString();
 	String nodeId = tmpList.get(1)==null?"":tmpList.get(1).toString();
 	String nodeName = tmpList.get(2)==null?"":tmpList.get(2).toString();
-	
+	String fileType = tmpList.get(3)==null?"":tmpList.get(3).toString();
 	System.out.println(tmpList);
 %>
 	var parentId = "<%=parentId%>";
 	var nodeId = "<%=nodeId%>";
 	var nodeName = "<%=nodeName%>";
+	var fileType = "<%=fileType%>"
 	var oParent = document.getElementById(parentId);
     //父节点合法不？
     if(oParent == null){
@@ -51,7 +52,11 @@ for(int i=0;i<al.size();i++){
     oNode.id = nodeId;
     oNode.className = 'node';
     //真够费劲的
-    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'>-</span>"+nodeName+"</div>";
+    if(fileType=="folder"){
+	    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'><img src=\"images/folder-open.gif\" /></span>"+nodeName+"</div>";
+    }else if(fileType=="file"){
+	    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'><img src=\"images/leaf.gif\" /></span>"+nodeName+"</div>";
+    }
     oParent.appendChild(oNode);
 <%}%>
 }
@@ -63,16 +68,16 @@ function showPath(){
 
 function fold(element)
 {
-     if(element.innerHTML == '+')
-     {
-          element.parentNode.parentNode.style.height = '';
-          element.innerHTML = '-';
-     }
-     else
-     {
-          element.innerHTML = '+';
-          element.parentNode.parentNode.style.height = element.parentNode.offsetHeight;
-     }
+	if(element.innerHTML.indexOf("images/folder.gif") !=-1)
+	  {
+		   element.parentNode.parentNode.style.height = '';
+		   element.innerHTML = '<span ><img src="images/folder-open.gif" /></span>';
+	  }
+	  else if(element.innerHTML.indexOf("images/folder-open.gif") !=-1)
+	  {
+		   element.innerHTML = '<span ><img src="images/folder.gif" /></span>';
+		   element.parentNode.parentNode.style.height = element.parentNode.offsetHeight;
+	  }
 }
 </script>
 </head>

@@ -39,17 +39,24 @@ public class GenerateFileTree extends HttpServlet{
 	
 	private void genFileTree(File filePath ,String parentNode,String node){
 		ArrayList<String> list = new ArrayList<String>();
-		list.add(parentNode);
-		list.add(node);
-		list.add(filePath.getName());
-		al.add(list);
 		if(filePath.isDirectory()){
+			list.add(parentNode);
+			list.add(node);
+			list.add(filePath.getName());
+			list.add("folder");
+			al.add(list);
 			loopNums++;
 			File[] file = filePath.listFiles();
 			for(int j=0;j<file.length;j++){
 				genFileTree(file[j],node,"d"+node+"w"+j);
 			}
 			loopNums--;
+		}else if(filePath.isFile()){
+			list.add(parentNode);
+			list.add(node);
+			list.add(filePath.getName());
+			list.add("file");
+			al.add(list);
 		}
 	}
 }
