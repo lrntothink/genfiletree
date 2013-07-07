@@ -44,6 +44,7 @@ public class GenerateFileTree extends HttpServlet{
 			list.add(node);
 			list.add(filePath.getName());
 			list.add("folder");
+			list.add(filePath.getAbsolutePath());
 			al.add(list);
 			loopNums++;
 			File[] file = filePath.listFiles();
@@ -56,6 +57,7 @@ public class GenerateFileTree extends HttpServlet{
 			list.add(node);
 			list.add(filePath.getName());
 			list.add("file");
+			list.add(filePath.getParent());
 			al.add(list);
 		}
 	}

@@ -2,7 +2,7 @@
 <%
 	String filepath = request.getAttribute("filepath")==null?"":request.getAttribute("filepath").toString().trim();
 	ArrayList al = (ArrayList)request.getAttribute("resultSet");
-System.out.println("***********"+al);
+	System.out.println("***********"+al);
 %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -25,6 +25,33 @@ System.out.println("***********"+al);
      margin-right:5px;
      cursor:pointer;
 }
+.divRightMenu
+{
+    z-index:30000;
+    text-align:left;    
+    cursor: default;
+    position: absolute;
+    background-color:#FAFFF8;
+    width:160px;
+    height:auto;
+    border: 1px solid #333333;
+    display:none;
+
+    filter:progid:DXImageTransform.Microsoft.Shadow(Color=#333333,Direction=120,strength=5);    
+}
+
+.divMenuItem
+{
+    height:17px;
+    color:Black;
+    font-family:宋体;
+    vertical-align:middle;
+    font-size:10pt;
+    margin-bottom:3px;
+    cursor:hand;
+    padding-left:30px;
+    padding-top:2px;        
+}
 </style>
 <script language="javascript">
 
@@ -37,6 +64,8 @@ for(int i=0;i<al.size();i++){
 	String nodeId = tmpList.get(1)==null?"":tmpList.get(1).toString();
 	String nodeName = tmpList.get(2)==null?"":tmpList.get(2).toString();
 	String fileType = tmpList.get(3)==null?"":tmpList.get(3).toString();
+	String filePath = tmpList.get(4)==null?"":tmpList.get(4).toString();
+	filePath = filePath.replaceAll("\\\\", "/");
 	System.out.println(tmpList);
 %>
 	var parentId = "<%=parentId%>";
@@ -53,9 +82,9 @@ for(int i=0;i<al.size();i++){
     oNode.className = 'node';
     //真够费劲的
     if(fileType=="folder"){
-	    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'><img src=\"images/folder-open.gif\" /></span>"+nodeName+"</div>";
+	    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'><img src=\"images/folder-open.gif\" /></span><span id='"+nodeId+"_menu' onmousemove=showFolderMenu(this) value='<%=filePath%>'>"+nodeName+"</span></div>";
     }else if(fileType=="file"){
-	    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'><img src=\"images/leaf.gif\" /></span>"+nodeName+"</div>";
+	    oNode.innerHTML = "<div id='"+nodeId+"_title' class='title'><span class='icon' onclick='fold(this)'><img src=\"images/leaf.gif\" /></span><span id='"+nodeId+"_menu' onmousemove=showFolderMenu(this) value='<%=filePath%>'>"+nodeName+"</span></div>";
     }
     oParent.appendChild(oNode);
 <%}%>
@@ -78,6 +107,97 @@ function fold(element)
 		   element.innerHTML = '<span ><img src="images/folder.gif" /></span>';
 		   element.parentNode.parentNode.style.height = element.parentNode.offsetHeight;
 	  }
+}
+function showFolderMenu(e){
+	//alert(e.id);
+	createMenu(e);
+	//$(e.id).innerHTML = "*******";
+	$(e.id).oncontextmenu = function(){
+		//alert(e.id);
+		//alert($(e.id));
+		showMenu();
+		return false;
+	};
+}
+/**
+ * 
+ */
+function createMenu(e){
+	var divMenu = document.createElement("div");
+	divMenu.id = "divRightMenu";
+	divMenu.className = "divRightMenu";
+	
+	var divOpenFolder          = document.createElement("Div");
+	divOpenFolder.className   = "divMenuItem";
+	divOpenFolder.onclick     = function(){
+		//alert($(e.id).value);
+		var val = $(e.id).value;
+		alert(val);
+		//window.open("file://d:/test");
+		//window.open("file://"+val);
+	};
+	divOpenFolder.onmousemove = evtMenuOnmouseMove;
+	divOpenFolder.onmouseout  = evtOnMouseOut;
+	divOpenFolder.innerHTML   = "打开文件夹";
+	
+	divMenu.appendChild(divOpenFolder);
+	
+	document.body.appendChild(divMenu);
+}
+function evtMenuOnmouseMove()
+{
+	this.style.backgroundColor='#8AAD77';
+	this.style.paddingLeft='30px';    
+}
+
+function evtOnMouseOut()
+{
+	this.style.backgroundColor='#FAFFF8';
+}
+function $(gID)
+{
+	return document.getElementById(gID);
+}
+/**
+ * 显示菜单
+ */
+function showMenu()
+{
+    document.documentElement.onclick  = hideMenu;
+    
+    var redge=document.documentElement.clientWidth-event.clientX;
+    var bedge=document.documentElement.clientHeight-event.clientY;
+    var menu = $("divRightMenu");
+    if (redge<menu.offsetWidth)
+    {
+        menu.style.left=document.body.scrollLeft + event.clientX-menu.offsetWidth
+    }
+    else
+    {
+        menu.style.left=document.body.scrollLeft + event.clientX
+        //这里有改动
+		//menu.style.visibility = "visible";//页面底端突出
+        menu.style.display = "block";
+    }
+    if (bedge<menu.offsetHeight)
+    {
+        menu.style.top=document.body.scrollTop + event.clientY - menu.offsetHeight
+    }
+    else
+    {
+        menu.style.top = document.body.scrollTop + event.clientY
+		//menu.style.visibility = "visible";
+        menu.style.display = "block";
+    }
+    return false;
+}
+
+/**
+ * 隐藏右键菜单
+ */
+function hideMenu()
+{
+    $("divRightMenu").style.display="none";    
 }
 </script>
 </head>
