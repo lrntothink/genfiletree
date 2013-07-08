@@ -21,4 +21,13 @@
   	/genFile
   	</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>showFileContent</servlet-name>
+  	<servlet-class>com.lrntothink.ShowFileContent</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>showFileContent</servlet-name>
+  	<url-pattern>/showContent</url-pattern>
+  </servlet-mapping>
 </web-app>

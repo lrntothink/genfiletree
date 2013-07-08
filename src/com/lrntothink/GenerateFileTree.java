@@ -33,7 +33,7 @@ public class GenerateFileTree extends HttpServlet{
 		
         request.setAttribute("resultSet", al);
         request.setAttribute("filepath", filePath);
-        RequestDispatcher setuppage = request.getRequestDispatcher("index.jsp" );
+        RequestDispatcher setuppage = request.getRequestDispatcher("genfiletree.jsp" );
         setuppage.forward(request, response);
     }
 	
@@ -57,7 +57,7 @@ public class GenerateFileTree extends HttpServlet{
 			list.add(node);
 			list.add(filePath.getName());
 			list.add("file");
-			list.add(filePath.getParent());
+			list.add(filePath.getAbsolutePath());
 			al.add(list);
 		}
 	}
