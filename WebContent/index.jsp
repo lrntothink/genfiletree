@@ -57,6 +57,7 @@
 
 <%if(al!=null){%>
 window.onload = function(){
+	createMenu();
 <%
 for(int i=0;i<al.size();i++){
 	ArrayList tmpList = (ArrayList)al.get(i);
@@ -116,47 +117,12 @@ function showFolderMenu(e){
 		//alert(e.id);
 		//alert($(e.id));
 		showMenu();
+		$("openfolder").onclick = function(){
+			hideMenu();
+			alert($(e.id).value);
+		}
 		return false;
 	};
-}
-/**
- * 
- */
-function createMenu(e){
-	var divMenu = document.createElement("div");
-	divMenu.id = "divRightMenu";
-	divMenu.className = "divRightMenu";
-	
-	var divOpenFolder          = document.createElement("Div");
-	divOpenFolder.className   = "divMenuItem";
-	divOpenFolder.onclick     = function(){
-		//alert($(e.id).value);
-		var val = $(e.id).value;
-		alert(val);
-		//window.open("file://d:/test");
-		//window.open("file://"+val);
-	};
-	divOpenFolder.onmousemove = evtMenuOnmouseMove;
-	divOpenFolder.onmouseout  = evtOnMouseOut;
-	divOpenFolder.innerHTML   = "打开文件夹";
-	
-	divMenu.appendChild(divOpenFolder);
-	
-	document.body.appendChild(divMenu);
-}
-function evtMenuOnmouseMove()
-{
-	this.style.backgroundColor='#8AAD77';
-	this.style.paddingLeft='30px';    
-}
-
-function evtOnMouseOut()
-{
-	this.style.backgroundColor='#FAFFF8';
-}
-function $(gID)
-{
-	return document.getElementById(gID);
 }
 /**
  * 显示菜单
@@ -199,6 +165,40 @@ function hideMenu()
 {
     $("divRightMenu").style.display="none";    
 }
+/**
+ * 创建右键菜单
+ */
+function createMenu(){
+	var divMenu = document.createElement("div");
+	divMenu.id = "divRightMenu";
+	divMenu.className = "divRightMenu";
+	
+	var divOpenFolder          = document.createElement("Div");
+	divOpenFolder.id = "openfolder";
+	divOpenFolder.className   = "divMenuItem";
+	divOpenFolder.onmousemove = evtMenuOnmouseMove;
+	divOpenFolder.onmouseout  = evtOnMouseOut;
+	divOpenFolder.innerHTML   = "打开文件夹";
+	
+	divMenu.appendChild(divOpenFolder);
+	
+	document.body.appendChild(divMenu);
+}
+function evtMenuOnmouseMove()
+{
+	this.style.backgroundColor='#8AAD77';
+	this.style.paddingLeft='30px';    
+}
+
+function evtOnMouseOut()
+{
+	this.style.backgroundColor='#FAFFF8';
+}
+function $(gID)
+{
+	return document.getElementById(gID);
+}
+
 </script>
 </head>
 <body>
