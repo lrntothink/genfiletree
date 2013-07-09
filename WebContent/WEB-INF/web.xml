@@ -30,4 +30,14 @@
   	<servlet-name>showFileContent</servlet-name>
   	<url-pattern>/showContent</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>downloadFile</servlet-name>
+  	<servlet-class>com.lrntothink.DownloadFile</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>downloadFile</servlet-name>
+  	<url-pattern>/downloadFile</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

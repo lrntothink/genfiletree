@@ -138,7 +138,16 @@ function downloadFile(e){
 		showMenu();
 		$("openfolder").onclick = function(){
 			hideMenu();
-			alert($(e.id).value);
+			//alert($(e.id).value);
+			var filetype = $(e.id).parentNode.childNodes[0].innerHTML;
+			//alert(filetype);
+			if(filetype.indexOf("images/leaf.gif")==-1){
+				alert("文件夹不能下载！");
+				return;
+			}
+			$("filename").value = $(e.id).value;
+			document.frmLst.action = "downloadFile";
+			document.frmLst.submit();
 		}
 		return false;
 	};
@@ -233,6 +242,7 @@ function $(gID)
 </head>
 <body>
 <form name="frmLst">
+<input type="hidden" name="filename" id="filename" value="">
 路径：<input type="text" name="filepath" id="filepath" size="20" value="<%=filepath%>"><br>
 <input type="button" value="提交" onClick="showPath()">
 <div id="root" class="mainnode"></div>

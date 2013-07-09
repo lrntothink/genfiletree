@@ -60,9 +60,12 @@ public class ShowFileContent extends HttpServlet{
         			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(filePath),"gbk"));
         			String line= null;
                     while ((line= reader.readLine()) != null) {
+//                    	if(line.trim().equals("")){
+//                    		continue;
+//                    	}
                     	line = line.replaceAll("<", "&lt;");
                     	line = line.replaceAll(">", "&gt;");
-                        out.println("\t"+line+"<br>");
+                        out.println(line+"<br>");
                    }
                    reader.close();
                    out.close();

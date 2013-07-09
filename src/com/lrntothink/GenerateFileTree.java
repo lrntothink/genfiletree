@@ -25,7 +25,7 @@ public class GenerateFileTree extends HttpServlet{
     }
     public void doGet(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
     	this.filePath = request.getParameter("filepath");
-        System.out.println(filePath);
+//        System.out.println(filePath);
         
         al = new ArrayList<ArrayList<String>>();
 		File file = new File(filePath);
