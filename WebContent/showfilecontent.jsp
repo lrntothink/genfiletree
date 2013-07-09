@@ -1,7 +1,6 @@
 <%
-	String filepath = request.getParameter("filepath")==null?"":request.getParameter("filepath").toString().trim();
-	System.out.println(filepath);
-	out.println(filepath);
+	String filecontent = request.getAttribute("filecontent")==null?"":request.getAttribute("filecontent").toString().trim();
+	out.println(filecontent);
 %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>

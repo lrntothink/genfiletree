@@ -21,7 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 
 public class ShowFileContent extends HttpServlet{
 	private String filePath;
-	private String allowFileType = " txt log c cfg sdf sql h sql ini css js inf ";
+	private String allowFileType = " txt log c cfg sdf sql h sql ini css js inf java  jsp xml inc ";
+//	private String plainFileType = " jsp xml inc ";
 	private String binFileType = " htm html jpg jpeg gif ico png ";
     public void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
     	doGet(request,response);
@@ -59,11 +60,30 @@ public class ShowFileContent extends HttpServlet{
         			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(filePath),"gbk"));
         			String line= null;
                     while ((line= reader.readLine()) != null) {
+                    	line = line.replaceAll("<", "&lt;");
+                    	line = line.replaceAll(">", "&gt;");
                         out.println("\t"+line+"<br>");
                    }
                    reader.close();
                    out.close();
-        		}else{
+        		}
+        		/*else if(plainFileType.contains(" "+fileType+" ")){
+        			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(filePath),"gbk"));
+        			String line= null;
+        			StringBuilder sb = new StringBuilder();
+                    while ((line= reader.readLine()) != null) {
+                    	line = line.replaceAll("<", "&lt;");
+                    	line = line.replaceAll(">", "&gt;");
+                        sb.append(line+"<br>");
+                   }
+                   reader.close();
+                   
+                   request.setAttribute("filecontent", sb.toString());
+                   RequestDispatcher setuppage = request.getRequestDispatcher("showfilecontent.jsp" );
+                   setuppage.forward(request, response);
+                   return;
+        		}*/
+        		else{
         			response.setHeader("content-type", "text/plain;charset=UTF-8");
         			response.setContentType( "text/plain;charset=UTF-8");
         			PrintWriter out = response.getWriter();
