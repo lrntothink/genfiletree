@@ -1,6 +1,8 @@
 package com.lrntothink;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,6 +15,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +24,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.HWPFDocumentCore;
+import org.apache.poi.hwpf.converter.PicturesManager;
+import org.apache.poi.hwpf.converter.WordToHtmlConverter;
+import org.apache.poi.hwpf.converter.WordToHtmlUtils;
+import org.apache.poi.hwpf.usermodel.Picture;
+import org.apache.poi.hwpf.usermodel.PictureType;
+import org.w3c.dom.Document;
 
 public class ShowFileContent extends HttpServlet{
 	private String filePath;
@@ -77,6 +95,52 @@ public class ShowFileContent extends HttpServlet{
                     setuppage.forward(request, response); 
                     
                     reader.close();
+        		}else if(fileType.equals("doc")){
+        			
+        			String projectPath = request.getSession().getServletContext().getRealPath("/");
+        			try{
+        			InputStream input = new FileInputStream(file);
+        			HWPFDocument wordDocument = new HWPFDocument(input);
+        			WordToHtmlConverter wordToHtmlConverter = new WordToHtmlConverter(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        			wordToHtmlConverter.setPicturesManager(new PicturesManager() {
+        				public String savePicture(byte[] content, PictureType pictureType, String suggestedName, float widthInches, float heightInches) {
+        					return suggestedName;
+        				}
+        			});
+        			wordToHtmlConverter.processDocument(wordDocument);
+        			List pics = wordDocument.getPicturesTable().getAllPictures();
+        			if (pics != null) {
+        				for (int i = 0; i < pics.size(); i++) {
+        					Picture pic = (Picture) pics.get(i);
+        					try {
+        						pic.writeImageContent(new FileOutputStream(projectPath + pic.suggestFullFileName()));
+        					} catch (FileNotFoundException e) {
+        						e.printStackTrace();
+        					}
+        				}
+        			}
+        			Document htmlDocument = wordToHtmlConverter.getDocument();
+        			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        			DOMSource domSource = new DOMSource(htmlDocument);
+        			StreamResult streamResult = new StreamResult(outStream);
+
+        			TransformerFactory tf = TransformerFactory.newInstance();
+        			Transformer serializer = tf.newTransformer();
+        			serializer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+        			serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+        			serializer.setOutputProperty(OutputKeys.METHOD, "html");
+        			serializer.transform(domSource, streamResult);
+        			outStream.flush();
+        			outStream.close();
+        			
+        			response.setHeader("content-type", "text/html;charset=UTF-8");
+        			response.setContentType( "text/html;charset=UTF-8");
+        			PrintWriter out = response.getWriter();
+        			out.println(new String(outStream.toByteArray()));
+        			
+        			}catch(Exception e){
+        				e.printStackTrace();
+        			}
         		}else if(binFileType.contains(" "+fileType+" ")){
         			response.setCharacterEncoding("gbk");
         			OutputStream outStream = response.getOutputStream();
