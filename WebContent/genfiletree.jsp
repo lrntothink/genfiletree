@@ -34,7 +34,11 @@
      overflow:hidden;
 }
 .mainnode {
-     padding-left:0px;
+     width:300px;
+     height:body.clientHeight     
+     overflow:scroll; 
+     border:0px solid;
+     margin-left:-10%
 }
 .icon {
      display:inline;

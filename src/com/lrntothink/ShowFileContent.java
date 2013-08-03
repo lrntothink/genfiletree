@@ -38,11 +38,18 @@ import org.apache.poi.hwpf.converter.WordToHtmlConverter;
 import org.apache.poi.hwpf.converter.WordToHtmlUtils;
 import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.hwpf.usermodel.PictureType;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.w3c.dom.Document;
+import org.xml.sax.ContentHandler;
 
 public class ShowFileContent extends HttpServlet{
 	private String filePath;
-	private String allowFileType = " txt log c cfg sdf sql h sql ini css js inf java  jsp xml inc ";
+//	private String allowFileType = " txt log c cfg sdf sql h sql ini js inf java  jsp xml inc ";
+	private String allowFileType = " xml jsp ";
 	private String binFileType = " htm html jpg jpeg gif ico png ";
     public void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
     	doGet(request,response);
@@ -174,13 +181,53 @@ public class ShowFileContent extends HttpServlet{
                    reader.close();
                    out.close();
         		}else{
-        			response.setHeader("content-type", "text/plain;charset=UTF-8");
-        			response.setContentType( "text/plain;charset=UTF-8");
-        			PrintWriter out = response.getWriter();
-        			out.println("你选择了："+fileName+"  类型为:"+fileType+" ，不能打开。");
-        			out.println("路径："+file.getAbsolutePath());
-        			out.println("支持的文件类型有："+allowFileType+binFileType);
-        			out.close();
+        			
+        			Parser parser = new AutoDetectParser(); // Should auto-detect!
+        	        ContentHandler handler = new BodyContentHandler(-1);
+        	        Metadata metadata = new Metadata();
+        	        metadata.add("resourceName", fileName);
+        	        String fileLength = file.length()+" ";
+        	        metadata.add("Content-Length", fileLength);
+        	        ParseContext context = new ParseContext();
+
+        	        try {
+        	        	InputStream stream = new FileInputStream(file);
+        				parser.parse(stream, handler, metadata, context);
+        				stream.close();
+        				
+        				response.setHeader("content-type", "text/html;charset=UTF-8");
+            			response.setContentType( "text/html;charset=UTF-8");
+            			PrintWriter out = response.getWriter();
+            			
+            			for(String s : metadata.names()) {
+            				out.println(s+":  "+metadata.get(s)+"<br>");
+            			}
+        				String header = "<html>" +
+        						"<head>" +
+        						"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>" +
+        						"<title>Html file</title>" +
+        						"</head>" +
+        						"<body>";
+        				out.println(header);
+        				out.println(handler.toString().replaceAll("\n+", "<br>"));
+        				out.println("</body></html>");
+        				out.flush();
+        				out.close();
+        			} catch (Exception e) {        
+        				e.printStackTrace();
+        			}
+ 
+//        	        String content = handler.toString();
+//        	        System.out.println(content);
+        			
+        			
+//        			response.setHeader("content-type", "text/plain;charset=UTF-8");
+//        			response.setContentType( "text/plain;charset=UTF-8");
+//        			PrintWriter out = response.getWriter();
+//        			out.println("你选择了："+fileName+"  类型为:"+fileType+" ，不能打开。");
+//        			out.println("路径："+file.getAbsolutePath());
+//        			out.println("支持的文件类型有："+allowFileType+binFileType);
+//        			out.close();
         		}
         	}
         }else{
@@ -188,8 +235,9 @@ public class ShowFileContent extends HttpServlet{
 			response.setContentType("text/plain;charset=UTF-8");
 			PrintWriter out = response.getWriter();
 			File[] f = file.listFiles();
-			out.println("你选择了文件夹："+file.getName()+"  路径："+file.getAbsolutePath());
-			out.println("此文件夹包含以下文件或文件夹：");
+			out.println("你选择了文件夹："+file.getName());
+			out.println("路径："+file.getAbsolutePath());
+			out.println("包含以下文件或文件夹：");
 			for(File f1:f){
 				out.println(f1.getName());
 			}
