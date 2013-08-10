@@ -13,5 +13,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="E:/jar/detectCode/icu4j-4.8.1.1.jar"/>
+	<classpathentry kind="lib" path="E:/jar/detectCode/juniversalchardet-1.0.3.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

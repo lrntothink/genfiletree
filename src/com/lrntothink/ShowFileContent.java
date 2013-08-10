@@ -1,8 +1,8 @@
 package com.lrntothink;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,10 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.io.Reader;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,10 +30,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.HWPFDocumentCore;
 import org.apache.poi.hwpf.converter.PicturesManager;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
-import org.apache.poi.hwpf.converter.WordToHtmlUtils;
 import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.hwpf.usermodel.PictureType;
 import org.apache.tika.metadata.Metadata;
@@ -46,10 +42,15 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.w3c.dom.Document;
 import org.xml.sax.ContentHandler;
 
+import utils.chinese.ZHConverter;
+
+import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
+
 public class ShowFileContent extends HttpServlet{
 	private String filePath;
-//	private String allowFileType = " txt log c cfg sdf sql h sql ini js inf java  jsp xml inc ";
-	private String allowFileType = " xml jsp ";
+	private String allowFileType = " txt log c cfg sdf sql h sql ini js inf java  jsp xml inc ";
+//	private String allowFileType = " xml jsp ";
 	private String binFileType = " htm html jpg jpeg gif ico png ";
     public void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
     	doGet(request,response);
@@ -65,7 +66,16 @@ public class ShowFileContent extends HttpServlet{
         		String fileType = fileName.substring(fileName.lastIndexOf(".")+1).toLowerCase();
         		
         		if(fileType.equals("html")||fileType.equals("htm")){
-        			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(file),"utf-8"));
+        			
+        			CharsetDetector dec = new CharsetDetector();
+        	        dec.setText(new BufferedInputStream(new FileInputStream(filePath)));
+        	        CharsetMatch match = dec.detect();
+        	        System.out.println(match.getName() + "->" + match.getLanguage() + ":" + match.getConfidence());
+        	        String charsetDecode = match.getName();
+        			
+        	        ZHConverter converter = ZHConverter.getInstance(ZHConverter.SIMPLIFIED);
+        	        
+        			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(file),charsetDecode));
         			String line= null;
         			StringBuilder sb = new StringBuilder();
                     while ((line= reader.readLine()) != null) {
@@ -93,7 +103,9 @@ public class ShowFileContent extends HttpServlet{
                 		      fos.close();
                 			
                 			line = line.replaceAll(imgfile, "imagesTmp/"+imgfile);
-                		}
+                		}else if("big5".equalsIgnoreCase(charsetDecode)){
+        	        		line = converter.convert(line);
+        	        	}
                 		sb.append(line);
                    }
                     
@@ -166,20 +178,49 @@ public class ShowFileContent extends HttpServlet{
         			} 
         		}else if(allowFileType.contains(" "+fileType+" ")){
         			response.setHeader("content-type", "text/html;charset=UTF-8");
-        			response.setContentType( "text/html;charset=UTF-8");
-        			PrintWriter out = response.getWriter();
-        			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(filePath),"gbk"));
-        			String line= null;
-                    while ((line= reader.readLine()) != null) {
-//                    	if(line.trim().equals("")){
-//                    		continue;
-//                    	}
-                    	line = line.replaceAll("<", "&lt;");
-                    	line = line.replaceAll(">", "&gt;");
-                        out.println(line+"<br>");
-                   }
-                   reader.close();
-                   out.close();
+         			response.setContentType( "text/html;charset=UTF-8");
+         			PrintWriter out = response.getWriter();
+        			
+        			CharsetDetector dec = new CharsetDetector();
+        	        dec.setText(new BufferedInputStream(new FileInputStream(filePath)));
+        	        CharsetMatch match = dec.detect();
+        	        System.out.println(match.getName() + "->" + match.getLanguage() + ":" + match.getConfidence());
+        	        String charsetDecode = match.getName().trim();
+        	        Reader reader = match.getReader();
+//        	        System.out.println(match.getString());
+        	        
+        	        ZHConverter converter = ZHConverter.getInstance(ZHConverter.SIMPLIFIED);
+        	        
+        	        BufferedReader br = new BufferedReader(reader);
+        	        String line = null;
+        	        while((line=br.readLine())!=null){
+        	        	if("big5".equalsIgnoreCase(charsetDecode)){
+        	        		line = converter.convert(line);
+        	        		out.println(line+"<br>");
+        	        	}else{
+        	        		out.println(line+"<br>");
+        	        	}
+        	        }
+        	        reader.close();
+        	        
+//         			out.println(match.getString());
+         			out.close();
+        	         
+//        			response.setHeader("content-type", "text/html;charset=UTF-8");
+//        			response.setContentType( "text/html;charset=UTF-8");
+//        			PrintWriter out = response.getWriter();
+//        			BufferedReader reader= new BufferedReader(new InputStreamReader( new FileInputStream(filePath),"gbk"));
+//        			String line= null;
+//                    while ((line= reader.readLine()) != null) {
+////                    	if(line.trim().equals("")){
+////                    		continue;
+////                    	}
+//                    	line = line.replaceAll("<", "&lt;");
+//                    	line = line.replaceAll(">", "&gt;");
+//                        out.println(line+"<br>");
+//                   }
+//                   reader.close();
+//                   out.close();
         		}else{
         			
         			Parser parser = new AutoDetectParser(); // Should auto-detect!
